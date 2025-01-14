@@ -1,3 +1,4 @@
+using System.Net.Http.Headers;
 using System.Text;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Newtonsoft.Json;
@@ -16,23 +17,40 @@ public static class Todos
         return app;
     }
 
-    private static async Task<IResult> LoginToA(HttpClient client, HttpContext context)
+    private static async Task<IResult> LoginToA(HttpClient client, UserRequest request)
     {
-        var request = new Request
+        var stringContent = new StringContent(JsonConvert.SerializeObject(new Request
         {
-            UserName = "vv",
-            Id = "12345"
-        };
-        var httpRequestMessage = new HttpRequestMessage();
-        httpRequestMessage.Content = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json");
-        var response = await client.PostAsync("http://localhost:5222/Lunch/getaa", httpRequestMessage.Content);
-        return Results.Ok(JsonConvert.DeserializeObject(await response.Content.ReadAsStringAsync()));
+            UserName = request.Name,
+            Id = request.Id.ToString()
+        }), Encoding.UTF8, "application/json");
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "JwtHeader.JwtPayload.Signature");
+        var response = await client.PostAsync("http://localhost:5222/Lunch/getaa", stringContent);
+        return Results.Ok(JsonConvert.DeserializeObject<LoginResponse>(await response.Content.ReadAsStringAsync()));
     }
 
     private static IResult GetTodos(HttpContext context)
     {
         return Results.Ok("okay");
     }
+}
+
+internal class LoginResponse
+{
+    [JsonProperty("message")]
+    public string Message { get; set; }
+
+    [JsonProperty("time")]
+    public DateTime Time { get; set; }
+}
+
+internal class UserRequest
+{
+    [JsonProperty("name")]
+    public string Name { get; set; }
+
+    [JsonProperty("id")]
+    public int Id { get; set; }
 }
 
 internal class Request
