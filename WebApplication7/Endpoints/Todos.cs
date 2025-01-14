@@ -1,5 +1,7 @@
 using System.Text;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Newtonsoft.Json;
+using WebApplication7.Filter;
 
 
 namespace WebApplication7.Endpoints;
@@ -10,7 +12,7 @@ public static class Todos
     {
         var group = app.MapGroup("Todos");
         group.MapGet("/", GetTodos);
-        group.MapPost("/login", LoginToA);
+        group.MapPost("/login", LoginToA).AddEndpointFilter<AuthorizationFilter>();
         return app;
     }
 
