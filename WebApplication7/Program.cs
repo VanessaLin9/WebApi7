@@ -1,5 +1,6 @@
 global using ILogger = Serilog.ILogger; 
 using WebApplication7.Endpoints;
+using WebApplication7.Filter;
 using WebApplication7.Middleware;
 using XitMent.Core.Serilog;
 using XitMent.Core.Serilog.Extensions;
@@ -9,6 +10,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpClient();
 builder.Services.AddTransient<ExceptionMiddleware>();
+builder.Services.AddTransient(x => builder.Configuration.GetSection("Auth").Get<AuthConfig>());
 
 builder.UseXitMentSerilog(new SerilogSetting(
     Environment.GetEnvironmentVariable("ASPNETCORE_ENVIROMENT").ToDeployEnvironment(),

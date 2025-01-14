@@ -8,7 +8,6 @@ public class ExceptionMiddleware(ILogger logger) : IMiddleware
     private readonly Dictionary<string, HttpStatusCode> _statusLookup = new()
     {
         { "UnAuthorization", HttpStatusCode.Unauthorized },
-
     };
     
     public async Task InvokeAsync(HttpContext context, RequestDelegate next)
@@ -23,9 +22,7 @@ public class ExceptionMiddleware(ILogger logger) : IMiddleware
             var errorMessage = e.Message;
             logger.Error(errorMessage);
 
-            context.Response.StatusCode = _statusLookup.TryGetValue(errorMessage, out var code) 
-                ? (int)code
-                : (int)HttpStatusCode.InternalServerError;
+            context.Response.StatusCode = (int)_statusLookup.GetValueOrDefault(errorMessage, HttpStatusCode.InternalServerError);
             
             await context.Response.WriteAsync(JsonConvert.SerializeObject(new Response
             {
